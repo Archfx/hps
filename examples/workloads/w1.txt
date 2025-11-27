@@ -1,0 +1,5 @@
+# id tenant arrival_us num_boot key_size_mb noise_budget priority deadline_us
+0 0 0      3000 128 20 0 0
+1 1 500    6000 256 15 1 0
+2 0 1500   4000 64  30 0 0
+3 2 2000   8000 128 10 2 100000
