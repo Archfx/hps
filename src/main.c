@@ -18,7 +18,8 @@ static void print_stats(const char *label, const HwConfig *cfg,
     printf("Makespan: %.2f us\n", s->makespan_us);
     printf("Avg Completion: %.2f us\n", s->avg_completion_time_us);
     printf("Avg Slowdown: %.3f\n", s->avg_slowdown);
-    printf("Utilization: %.3f\n\n", s->engine_utilization);
+    printf("Utilization: %.3f\n", s->engine_utilization);
+    printf("Fairness (Jain over tenant avg slowdown): %.4f\n\n", s->fairness);
 }
 
 int main(int argc, char **argv) {

@@ -2,7 +2,7 @@
 #include "../includes/scheduler.h"
 
 // FIFO scheduler
-int pick_job_fifo(TfheJob *jobs, int n_jobs, double now_us) {
+int pick_job_fifo(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) {
     double best_arrival = DBL_MAX;
     int best_idx = -1;
 
@@ -54,8 +54,13 @@ int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) 
         double fairness = 1.0 / (jobs[i].tenant_id + 1.0);
 
         // ----- 5. Bandwidth Feasibility (soft check) -----
-        // If job would take too long due to large key, penalize
-        double est_bs_time_us = bootstrap_time_us(cfg, &jobs[i]);
+        // Consider batching: estimate time for one bootstrap multiplied by
+        // the batch size that will be scheduled for this job.
+        int effective_batch = 1;
+        if (cfg && cfg->batch_size > 1)
+            effective_batch = cfg->batch_size < jobs[i].remaining_bootstraps ? cfg->batch_size : jobs[i].remaining_bootstraps;
+
+        double est_bs_time_us = bootstrap_time_us(cfg, &jobs[i]) * effective_batch;
         double bw_penalty = est_bs_time_us > 0 ? (1.0 / est_bs_time_us) : 1.0;
 
         // ----- 6. Combine scores -----

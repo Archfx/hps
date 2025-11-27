@@ -1,0 +1,34 @@
+# Build artifacts
+/src/*.o
+/tfhe_sim
+/*.out
+/*.exe
+core
+
+# Temporary and backup files
+*~
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated example files and temporary workloads/configs
+/examples/hw/hw_rand_*.cfg
+/examples/workloads/wl_rand_*.txt
+/tmp_*.cfg
+/tmp_*.txt
+
+# IDE / editor
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# Logs
+.cache/
+*.log

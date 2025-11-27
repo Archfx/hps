@@ -8,6 +8,7 @@ typedef struct {
     double pcie_bandwidth_gbps;
     double freq_ghz;
     double ctx_switch_overhead_us;
+    int batch_size;
 } HwConfig;
 
 typedef struct {
@@ -37,6 +38,7 @@ typedef struct {
     double avg_completion_time_us;
     double avg_slowdown;
     double engine_utilization;
+    double fairness; // Jain's fairness index over per-tenant average slowdown (0..1)
 } SimStats;
 
 #endif
