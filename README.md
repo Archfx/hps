@@ -3,8 +3,7 @@
 
 
 A lightweight C-based simulator for evaluating scheduling strategies on TFHE hardware accelerators.  
-It models TFHE jobs, bootstrapping engines, bandwidth limits, and key-switch overheads—**no cryptography is performed**.
-
+It models TFHE jobs, bootstrapping engines, bandwidth limits, and key-switch overheads.
 ## Build
 ```bash
 make
