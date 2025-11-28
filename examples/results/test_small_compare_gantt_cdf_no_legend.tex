@@ -1,0 +1,101 @@
+% This file was created with tikzplotlib v0.10.1.
+\begin{tikzpicture}
+
+\definecolor{crimson2143940}{RGB}{214,39,40}
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{darkorange25512714}{RGB}{255,127,14}
+\definecolor{forestgreen4416044}{RGB}{44,160,44}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{groupplot}[group style={group size=2 by 2}]
+\nextgroupplot[
+tick align=outside,
+tick pos=left,
+title={FIFO: job start -> completion},
+x grid style={darkgray176},
+xlabel={Time (us)},
+xmin=500, xmax=174326225,
+xtick style={color=black},
+xtick={0,20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000},
+xticklabels={0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8},
+y dir=reverse,
+y grid style={darkgray176},
+ymin=-0.79, ymax=7.79,
+ytick style={color=black}
+]
+\draw[draw=black,fill=steelblue31119180] (axis cs:500,-0.4) rectangle (axis cs:48003500,0.4);
+\draw[draw=black,fill=darkorange25512714] (axis cs:48003500,0.6) rectangle (axis cs:78007250,1.4);
+\draw[draw=black,fill=forestgreen4416044] (axis cs:78007250,1.6) rectangle (axis cs:98012250,2.4);
+\draw[draw=black,fill=darkorange25512714] (axis cs:98012250,2.6) rectangle (axis cs:114014250,3.4);
+\draw[draw=black,fill=steelblue31119180] (axis cs:114014250,3.6) rectangle (axis cs:138015750,4.4);
+\draw[draw=black,fill=crimson2143940] (axis cs:138015750,4.6) rectangle (axis cs:148018250,5.4);
+\draw[draw=black,fill=forestgreen4416044] (axis cs:148018250,5.6) rectangle (axis cs:157022750,6.4);
+\draw[draw=black,fill=crimson2143940] (axis cs:157022750,6.6) rectangle (axis cs:166025000,7.4);
+
+\nextgroupplot[
+tick align=outside,
+tick pos=left,
+title={HPS: job start -> completion},
+x grid style={darkgray176},
+xlabel={Time (us)},
+xmin=500, xmax=174326225,
+xtick style={color=black},
+xtick={0,20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000},
+xticklabels={0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8},
+y dir=reverse,
+y grid style={darkgray176},
+ymin=-0.79, ymax=7.79,
+ytick style={color=black},
+ytick={0,1,2,3,4,5,6,7},
+yticklabels={0,4,1,3,6,2,7,5}
+]
+\draw[draw=black,fill=steelblue31119180] (axis cs:500,-0.4) rectangle (axis cs:102008750,0.4);
+\draw[draw=black,fill=steelblue31119180] (axis cs:32502,0.6) rectangle (axis cs:24066006,1.4);
+\draw[draw=black,fill=darkorange25512714] (axis cs:96506,1.6) rectangle (axis cs:54037752,2.4);
+\draw[draw=black,fill=darkorange25512714] (axis cs:102008750,2.6) rectangle (axis cs:118010750,3.4);
+\draw[draw=black,fill=forestgreen4416044] (axis cs:118010750,3.6) rectangle (axis cs:127015250,4.4);
+\draw[draw=black,fill=forestgreen4416044] (axis cs:127015250,4.6) rectangle (axis cs:147020250,5.4);
+\draw[draw=black,fill=crimson2143940] (axis cs:147020250,5.6) rectangle (axis cs:156022500,6.4);
+\draw[draw=black,fill=crimson2143940] (axis cs:156022500,6.6) rectangle (axis cs:166025000,7.4);
+
+\nextgroupplot[
+tick align=outside,
+tick pos=left,
+x grid style={darkgray176},
+xlabel={Completion time (us)},
+xmajorgrids,
+xmin=16968056.3, xmax=173122949.7,
+xtick style={color=black},
+xtick={0,20000000,40000000,60000000,80000000,100000000,120000000,140000000,160000000,180000000},
+xticklabels={0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8},
+y grid style={darkgray176},
+ylabel={CDF},
+ymajorgrids,
+ymin=0.08125, ymax=1.04375,
+ytick style={color=black}
+]
+\addplot [semithick, steelblue31119180]
+table {%
+48003500 0.125
+78007250 0.25
+98012250 0.375
+114014250 0.5
+138015750 0.625
+148018250 0.75
+157022750 0.875
+166025000 1
+};
+\addplot [semithick, darkorange25512714]
+table {%
+24066006 0.125
+54037752 0.25
+102008750 0.375
+118010750 0.5
+127015250 0.625
+147020250 0.75
+156022500 0.875
+166025000 1
+};
+\end{groupplot}
+
+\end{tikzpicture}

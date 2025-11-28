@@ -26,6 +26,7 @@ typedef struct {
     double start_time_us;
     double completion_time_us;
     int started;
+    int pcie_transferred; // 0 = not transferred, -1 = transfer in-progress, 1 = transfer complete
 } TfheJob;
 
 typedef struct {

@@ -9,6 +9,7 @@ int pick_job_fifo(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us)
     for (int i = 0; i < n_jobs; i++) {
         if (jobs[i].remaining_bootstraps <= 0) continue;
         if (jobs[i].arrival_time_us > now_us) continue;
+        
 
         if (jobs[i].arrival_time_us < best_arrival) {
             best_arrival = jobs[i].arrival_time_us;
@@ -19,13 +20,29 @@ int pick_job_fifo(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us)
 }
 
 // Hardware-parametric scheduler 
+/* Tunable HPS weights (defaults chosen previously). */
+static double g_w_key_affinity = 3.0;
+static double g_w_noise_urgency = 4.0;
+static double g_w_bw_penalty = 2.0;
+static double g_w_fairness = 1.5;
+static double g_w_deadline = 2.0;
+
+void scheduler_set_weights(double w_key_affinity,
+                           double w_noise_urgency,
+                           double w_bw_penalty,
+                           double w_fairness,
+                           double w_deadline)
+{
+    g_w_key_affinity = w_key_affinity;
+    g_w_noise_urgency = w_noise_urgency;
+    g_w_bw_penalty = w_bw_penalty;
+    g_w_fairness = w_fairness;
+    g_w_deadline = w_deadline;
+}
+
 int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) {
     int best_idx = -1;
     double best_score = -1e300;
-
-    // Hardware effective per-engine bandwidth (GB/s → MB/us)
-    double bw_per_engine_MB_per_us =
-        (cfg->hbm_bandwidth_gbps / (double)cfg->num_engines) * 1000.0 / 8.0 / 1e6;
 
     for (int i = 0; i < n_jobs; i++) {
 
@@ -34,11 +51,9 @@ int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) 
         if (jobs[i].arrival_time_us > now_us) continue;
 
         // ----- 1. Key-Affinity Score (approximate) -----
-        // Jobs with smaller key sizes → better locality, lower bandwidth stress
         double key_affinity = 1.0 / (jobs[i].key_size_mb + 1.0);
 
         // ----- 2. Noise-Aware Priority -----
-        // Small noise budget → urgent (approximate: lower = more urgent)
         double noise_urgency = 1.0 / (jobs[i].noise_budget + 1e-9);
 
         // ----- 3. Deadline Awareness -----
@@ -50,12 +65,9 @@ int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) 
         }
 
         // ----- 4. Tenant-Level Fairness -----
-        // Higher tenant_id → lower priority (simple fairness proxy)
         double fairness = 1.0 / (jobs[i].tenant_id + 1.0);
 
         // ----- 5. Bandwidth Feasibility (soft check) -----
-        // Consider batching: estimate time for one bootstrap multiplied by
-        // the batch size that will be scheduled for this job.
         int effective_batch = 1;
         if (cfg && cfg->batch_size > 1)
             effective_batch = cfg->batch_size < jobs[i].remaining_bootstraps ? cfg->batch_size : jobs[i].remaining_bootstraps;
@@ -63,14 +75,13 @@ int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) 
         double est_bs_time_us = bootstrap_time_us(cfg, &jobs[i]) * effective_batch;
         double bw_penalty = est_bs_time_us > 0 ? (1.0 / est_bs_time_us) : 1.0;
 
-        // ----- 6. Combine scores -----
+        // ----- 6. Combine scores (use tunable weights) -----
         double score =
-            3.0 * key_affinity +      // favor key-locality
-            4.0 * noise_urgency +     // noise deadline aware
-            2.0 * bw_penalty +        // HBM-friendly
-            1.5 * fairness +          // tenant fairness
-            2.0 * deadline_score;     // soft deadlines
-
+            g_w_key_affinity * key_affinity +
+            g_w_noise_urgency * noise_urgency +
+            g_w_bw_penalty * bw_penalty +
+            g_w_fairness * fairness +
+            g_w_deadline * deadline_score;
 
         if (score > best_score) {
             best_score = score;

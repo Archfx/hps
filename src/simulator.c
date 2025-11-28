@@ -1,8 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
+#include <string.h>
 #include "../includes/simulator.h"
 #include "../includes/scheduler.h"
+
+typedef struct {
+    int job_id; // job index
+    double remaining_bits; // remaining transfer size in bits
+} Transfer;
+
+// File-scope testing knobs
+static double g_pcie_scale = 1.0; // multiply pcie bandwidth by this
+static double g_pcie_cap_mb = 0.0; // cap per-transfer size in MB (0 = no cap)
+static int g_show_progress = 0;    // whether to print progress updates
+static char *g_csv_prefix = NULL;
+
+void simulator_set_pcie_scale(double scale) {
+    if (scale > 0.0) g_pcie_scale = scale;
+}
+
+void simulator_set_pcie_cap_mb(double cap_mb) {
+    if (cap_mb >= 0.0) g_pcie_cap_mb = cap_mb;
+}
+
+void simulator_set_show_progress(int show) {
+    g_show_progress = show ? 1 : 0;
+}
+
+void simulator_set_csv_prefix(const char *prefix) {
+    if (g_csv_prefix) free(g_csv_prefix);
+    if (prefix) g_csv_prefix = strdup(prefix);
+    else g_csv_prefix = NULL;
+}
 
 SimStats run_simulation(const HwConfig *cfg,
                         TfheJob *jobs_original,
@@ -12,6 +42,16 @@ SimStats run_simulation(const HwConfig *cfg,
     TfheJob *jobs = malloc(n_jobs * sizeof(TfheJob));
     for (int i = 0; i < n_jobs; i++) {
         jobs[i] = jobs_original[i];
+        // initialize PCIe transfer state: if no PCIe BW configured, treat as already transferred
+        if (cfg->pcie_bandwidth_gbps <= 0.0) jobs[i].pcie_transferred = 1;
+        else jobs[i].pcie_transferred = 0;
+    }
+
+    // PCIe transfer tracking (contention-aware)
+    Transfer *transfers = malloc(n_jobs * sizeof(Transfer));
+    for (int t = 0; t < n_jobs; t++) {
+        transfers[t].job_id = -1;
+        transfers[t].remaining_bits = 0.0;
     }
 
     Engine *engines = malloc(cfg->num_engines * sizeof(Engine));
@@ -23,6 +63,8 @@ SimStats run_simulation(const HwConfig *cfg,
     double now_us = 0;
     double total_engine_busy_us = 0;
     int jobs_finished = 0;
+
+    /* using file-scope knobs g_pcie_scale and g_pcie_cap_mb */
 
     int log_picks = getenv("HPS_LOG_PICKS") != NULL;
     const char *sched_label = "scheduler";
@@ -48,6 +90,21 @@ SimStats run_simulation(const HwConfig *cfg,
                 next_event = jobs[j].arrival_time_us;
         }
 
+        // Next transfer completion (contention-aware)
+        int active_transfers = 0;
+        for (int t = 0; t < n_jobs; t++) if (transfers[t].job_id >= 0) active_transfers++;
+        if (active_transfers > 0 && cfg->pcie_bandwidth_gbps > 0.0) {
+            double eff_pcie_gbps = cfg->pcie_bandwidth_gbps * g_pcie_scale;
+            double bits_per_us_per_transfer = (eff_pcie_gbps * 1e3) / (double)active_transfers; // bits/us
+            for (int t = 0; t < n_jobs; t++) {
+                if (transfers[t].job_id >= 0) {
+                    double time_to_finish = transfers[t].remaining_bits / bits_per_us_per_transfer;
+                    double candidate = now_us + time_to_finish;
+                    if (candidate < next_event) next_event = candidate;
+                }
+            }
+        }
+
         if (next_event == DBL_MAX)
             break;
 
@@ -61,6 +118,35 @@ SimStats run_simulation(const HwConfig *cfg,
         total_engine_busy_us += delta * busy_eng;
         now_us = next_event;
 
+        // Update PCIe transfers progress
+        if (cfg->pcie_bandwidth_gbps > 0.0) {
+            int active_transfers2 = 0;
+            for (int t = 0; t < n_jobs; t++) if (transfers[t].job_id >= 0) active_transfers2++;
+            if (active_transfers2 > 0) {
+                double eff_pcie_gbps = cfg->pcie_bandwidth_gbps * g_pcie_scale;
+                double bits_per_us_per_transfer = (eff_pcie_gbps * 1e3) / (double)active_transfers2; // bits/us
+                double bits_decr = delta * bits_per_us_per_transfer;
+                for (int t = 0; t < n_jobs; t++) {
+                    if (transfers[t].job_id >= 0) {
+                        transfers[t].remaining_bits -= bits_decr;
+                        if (transfers[t].remaining_bits < 1e-6)
+                            transfers[t].remaining_bits = 0.0;
+                    }
+                }
+            }
+        }
+
+        // Handle transfer completions
+        for (int t = 0; t < n_jobs; t++) {
+            if (transfers[t].job_id >= 0 && transfers[t].remaining_bits <= 0.0) {
+                int j = transfers[t].job_id;
+                jobs[j].pcie_transferred = 1;
+                if (log_picks)
+                    printf("[PCIe] transfer complete at %.0f us -> job %d\n", now_us, j);
+                transfers[t].job_id = -1;
+                transfers[t].remaining_bits = 0.0;
+            }
+        }
         // Complete bootstrap operations
         for (int e = 0; e < cfg->num_engines; e++) {
             if (engines[e].job_id >= 0 &&
@@ -72,6 +158,11 @@ SimStats run_simulation(const HwConfig *cfg,
                 if (jobs[j].remaining_bootstraps == 0) {
                     jobs[j].completion_time_us = now_us;
                     jobs_finished++;
+                    if (g_show_progress) {
+                        double pct = (100.0 * (double)jobs_finished) / (double)n_jobs;
+                        printf("\rProgress: %d/%d (%.1f%%) — now=%.0f us", jobs_finished, n_jobs, pct, now_us);
+                        fflush(stdout);
+                    }
                 }
                 engines[e].job_id = -1;
             }
@@ -95,6 +186,34 @@ SimStats run_simulation(const HwConfig *cfg,
             if (!jobs[j].started) {
                 jobs[j].started = 1;
                 jobs[j].start_time_us = now_us;
+            }
+
+            // If the job's key hasn't been transferred yet, start a PCIe transfer
+            if (!jobs[j].pcie_transferred) {
+                // check if a transfer is already active for this job
+                int found = 0;
+                for (int t = 0; t < n_jobs; t++) {
+                    if (transfers[t].job_id == j) { found = 1; break; }
+                }
+                if (!found) {
+                    // find a free transfer slot
+                    for (int t = 0; t < n_jobs; t++) {
+                        if (transfers[t].job_id < 0) {
+                            // remaining bits = key_size_mb * 8e6 bits
+                            transfers[t].job_id = j;
+                            double use_mb = jobs[j].key_size_mb;
+                            if (g_pcie_cap_mb > 0.0 && use_mb > g_pcie_cap_mb) use_mb = g_pcie_cap_mb;
+                            transfers[t].remaining_bits = use_mb * 8.0 * 1e6;
+                            jobs[j].pcie_transferred = -1; // in progress
+                            if (log_picks)
+                                printf("[PCIe] transfer start at %.0f us -> job %d size=%.2f MB (orig=%.2f)\n",
+                                       now_us, j, use_mb, jobs[j].key_size_mb);
+                            break;
+                        }
+                    }
+                }
+                // Do not assign engines to this job until transfer completes; try another job
+                continue;
             }
 
             int batch_len = 1;
@@ -205,9 +324,32 @@ SimStats run_simulation(const HwConfig *cfg,
     }
 
     s.fairness = fairness;
+    // Optionally write per-job CSV for analysis
+    if (g_csv_prefix) {
+        const char *label = "sim";
+        if (pick_job == (SchedulerFn)pick_job_fifo) label = "fifo";
+        else if (pick_job == (SchedulerFn)pick_job_hps) label = "hps";
+        char path[512];
+        snprintf(path, sizeof(path), "%s_%s.csv", g_csv_prefix, label);
+        FILE *f = fopen(path, "w");
+        if (f) {
+            fprintf(f, "job_id,tenant_id,arrival_us,start_us,completion_us,num_bootstraps,key_size_mb,pcie_transferred\n");
+            for (int i = 0; i < n_jobs; i++) {
+                int trans = jobs[i].pcie_transferred;
+                fprintf(f, "%d,%d,%.0f,%.0f,%.0f,%d,%.2f,%d\n",
+                        jobs[i].id, jobs[i].tenant_id,
+                        jobs[i].arrival_time_us, jobs[i].start_time_us,
+                        jobs[i].completion_time_us, jobs[i].num_bootstraps,
+                        jobs[i].key_size_mb, trans);
+            }
+            fclose(f);
+        }
+    }
 
     free(jobs);
     free(engines);
+    free(transfers);
+    if (g_show_progress) printf("\n");
 
     return s;
 }
