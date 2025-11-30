@@ -1,0 +1,36 @@
+% This file was created with tikzplotlib v0.10.1.
+\begin{tikzpicture}
+
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{darkorange25512714}{RGB}{255,127,14}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{axis}[
+tick align=outside,
+tick pos=left,
+title={Scheduler turnaround summary},
+x grid style={darkgray176},
+xmin=-0.435, xmax=1.435,
+xtick style={color=black},
+xtick={0,1},
+xticklabels={FIFO,HPS},
+y grid style={darkgray176},
+ylabel={Time (us)},
+ymin=0, ymax=3306542.4,
+ytick style={color=black},
+ytick={0,500000,1000000,1500000,2000000,2500000,3000000,3500000},
+yticklabels={0.0,0.5,1.0,1.5,2.0,2.5,3.0,3.5}
+]
+\draw[draw=none,fill=steelblue31119180] (axis cs:-0.35,0) rectangle (axis cs:0,2536110.96);
+\addlegendimage{ybar,ybar legend,draw=none,fill=steelblue31119180}
+\addlegendentry{Mean turnaround (us)}
+
+\draw[draw=none,fill=steelblue31119180] (axis cs:0.65,0) rectangle (axis cs:1,2623413.7);
+\draw[draw=none,fill=darkorange25512714] (axis cs:2.77555756156289e-17,0) rectangle (axis cs:0.35,3149088);
+\addlegendimage{ybar,ybar legend,draw=none,fill=darkorange25512714}
+\addlegendentry{Median turnaround (us)}
+
+\draw[draw=none,fill=darkorange25512714] (axis cs:1,0) rectangle (axis cs:1.35,3072280.5);
+\end{axis}
+
+\end{tikzpicture}

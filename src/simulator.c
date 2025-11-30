@@ -147,6 +147,7 @@ SimStats run_simulation(const HwConfig *cfg,
                 transfers[t].remaining_bits = 0.0;
             }
         }
+
         // Complete bootstrap operations
         for (int e = 0; e < cfg->num_engines; e++) {
             if (engines[e].job_id >= 0 &&
@@ -173,8 +174,17 @@ SimStats run_simulation(const HwConfig *cfg,
         int idle_engines = 0;
         for (int e = 0; e < cfg->num_engines; e++) if (engines[e].job_id < 0) idle_engines++;
 
+        // *** FIX: guard against infinite loops when all candidates are blocked.
+        int attempts = 0;
+
         // While there are idle engines, pick a job and assign up to batch_size
         while (idle_engines > 0) {
+            if (attempts >= n_jobs) {
+                // Tried as many picks as jobs this cycle, give up for now
+                break;
+            }
+            attempts++;
+
             int j = pick_job(cfg, jobs, n_jobs, now_us);
             if (j < 0) break;
 
@@ -218,7 +228,8 @@ SimStats run_simulation(const HwConfig *cfg,
 
             int batch_len = 1;
             if (cfg && cfg->batch_size > 1)
-                batch_len = cfg->batch_size < jobs[j].remaining_bootstraps ? cfg->batch_size : jobs[j].remaining_bootstraps;
+                batch_len = cfg->batch_size < jobs[j].remaining_bootstraps ?
+                            cfg->batch_size : jobs[j].remaining_bootstraps;
 
             if (batch_len > idle_engines) batch_len = idle_engines;
 
@@ -236,10 +247,21 @@ SimStats run_simulation(const HwConfig *cfg,
         }
     }
 
+    // If any job never finished (e.g., due to early termination), treat it
+    // as completing at now_us to avoid negative response times.
+    for (int i = 0; i < n_jobs; i++) {
+        if (jobs[i].completion_time_us <= 0.0) {
+            jobs[i].completion_time_us = now_us;
+        }
+    }
+
     // Compute stats
     double first_arrival = jobs[0].arrival_time_us;
-    double last_finish = 0;
+    for (int i = 1; i < n_jobs; i++)
+        if (jobs[i].arrival_time_us < first_arrival)
+            first_arrival = jobs[i].arrival_time_us;
 
+    double last_finish = 0;
     for (int i = 0; i < n_jobs; i++)
         if (jobs[i].completion_time_us > last_finish)
             last_finish = jobs[i].completion_time_us;
@@ -259,16 +281,17 @@ SimStats run_simulation(const HwConfig *cfg,
 
     s.avg_completion_time_us = sum_comp / n_jobs;
     s.avg_slowdown = sum_slow / n_jobs;
-    s.engine_utilization = total_engine_busy_us /
-                           (s.makespan_us * cfg->num_engines);
+
+    if (s.makespan_us > 0.0)
+        s.engine_utilization = total_engine_busy_us /
+                               (s.makespan_us * cfg->num_engines);
+    else
+        s.engine_utilization = 0.0;
 
     // Compute fairness: Jain's fairness index over per-tenant average slowdown.
-    // For each tenant present, compute avg slowdown (sum_slowdown_tenant / count).
-    // Jain = ( (sum x_i)^2 ) / (n * sum x_i^2)
-    // If only one tenant present, fairness = 1.0.
-    // First find max tenant id to size arrays (tenant ids are small ints in workloads).
     int max_tenant = -1;
-    for (int i = 0; i < n_jobs; i++) if (jobs[i].tenant_id > max_tenant) max_tenant = jobs[i].tenant_id;
+    for (int i = 0; i < n_jobs; i++)
+        if (jobs[i].tenant_id > max_tenant) max_tenant = jobs[i].tenant_id;
 
     double fairness = 1.0;
     if (max_tenant >= 0) {
@@ -293,7 +316,6 @@ SimStats run_simulation(const HwConfig *cfg,
                 }
             }
 
-            // collect per-tenant averages for tenants with >0 jobs
             double sum_x = 0.0;
             double sum_x2 = 0.0;
             int n_present = 0;
@@ -324,13 +346,14 @@ SimStats run_simulation(const HwConfig *cfg,
     }
 
     s.fairness = fairness;
+
     // Optionally write per-job CSV for analysis
     if (g_csv_prefix) {
         const char *label = "sim";
         if (pick_job == (SchedulerFn)pick_job_fifo) label = "fifo";
         else if (pick_job == (SchedulerFn)pick_job_hps) label = "hps";
         char path[512];
-        snprintf(path, sizeof(path), "%s_%s.csv", g_csv_prefix, label);
+        snprintf(path, sizeof(path), "%s-%s.csv", g_csv_prefix, label);
         FILE *f = fopen(path, "w");
         if (f) {
             fprintf(f, "job_id,tenant_id,arrival_us,start_us,completion_us,num_bootstraps,key_size_mb,pcie_transferred\n");

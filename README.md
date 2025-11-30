@@ -52,6 +52,13 @@ Set the env var `HPS_LOG_PICKS=1` to print per-pick logs (scheduler, simulation 
 HPS_LOG_PICKS=1 ./tfhe_sim examples/hw/hw1.cfg examples/workloads/w1.txt
 ```
 
+Plotter
+--------
+
+```shell
+python3 plotter/plotter.py test_small_fifo.csv test_small_hps.csv --out-prefix test_small
+```
+
 Notes
 -----
 

@@ -40,48 +40,61 @@ void scheduler_set_weights(double w_key_affinity,
     g_w_deadline = w_deadline;
 }
 
-int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) {
+int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us)
+{
     int best_idx = -1;
-    double best_score = -1e300;
+    double best_score = -DBL_MAX;
 
     for (int i = 0; i < n_jobs; i++) {
 
-        // Job not yet arrived or finished
+        // Skip jobs that cannot run logically
         if (jobs[i].remaining_bootstraps <= 0) continue;
         if (jobs[i].arrival_time_us > now_us) continue;
 
-        // ----- 1. Key-Affinity Score (approximate) -----
-        double key_affinity = 1.0 / (jobs[i].key_size_mb + 1.0);
+        /*************************************************************
+         * 1. Key affinity
+         *************************************************************/
+        double key_aff = 1.0 / (jobs[i].key_size_mb + 1.0);
 
-        // ----- 2. Noise-Aware Priority -----
-        double noise_urgency = 1.0 / (jobs[i].noise_budget + 1e-9);
+        /*************************************************************
+         * 2. Noise urgency (bounded)
+         *************************************************************/
+        double nb = jobs[i].noise_budget;
+        if (nb < 0) nb = 0;
+        if (nb > 1) nb = 1;
+        double noise_urg = (1.0 - nb);
 
-        // ----- 3. Deadline Awareness -----
+        /*************************************************************
+         * 3. Deadline pressure (bounded)
+         *************************************************************/
         double deadline_score = 0.0;
         if (jobs[i].deadline_us > 0.0) {
             double slack = jobs[i].deadline_us - now_us;
-            if (slack < 0) slack = 0.0001;
-            deadline_score = 1.0 / slack;
+            if (slack < 0) slack = 0;
+            if (slack > 20000) slack = 20000;
+            deadline_score = 1.0 - slack / (slack + 500.0);
         }
 
-        // ----- 4. Tenant-Level Fairness -----
-        double fairness = 1.0 / (jobs[i].tenant_id + 1.0);
+        /*************************************************************
+         * 4. Tenant fairness (bounded)
+         *************************************************************/
+        double fairness = 1.0 / (1.0 + jobs[i].tenant_id * 0.2);
 
-        // ----- 5. Bandwidth Feasibility (soft check) -----
-        int effective_batch = 1;
-        if (cfg && cfg->batch_size > 1)
-            effective_batch = cfg->batch_size < jobs[i].remaining_bootstraps ? cfg->batch_size : jobs[i].remaining_bootstraps;
+        /*************************************************************
+         * 5. Bandwidth penalty (per-bootstrap)
+         *************************************************************/
+        double t = bootstrap_time_us(cfg, &jobs[i]);
+        double bw_pen = 1.0 / (t + 1.0);
 
-        double est_bs_time_us = bootstrap_time_us(cfg, &jobs[i]) * effective_batch;
-        double bw_penalty = est_bs_time_us > 0 ? (1.0 / est_bs_time_us) : 1.0;
-
-        // ----- 6. Combine scores (use tunable weights) -----
+        /*************************************************************
+         * Combined weighted score
+         *************************************************************/
         double score =
-            g_w_key_affinity * key_affinity +
-            g_w_noise_urgency * noise_urgency +
-            g_w_bw_penalty * bw_penalty +
-            g_w_fairness * fairness +
-            g_w_deadline * deadline_score;
+              g_w_key_affinity  * key_aff
+            + g_w_noise_urgency * noise_urg
+            + g_w_deadline      * deadline_score
+            + g_w_fairness      * fairness
+            + g_w_bw_penalty    * bw_pen;
 
         if (score > best_score) {
             best_score = score;
@@ -89,8 +102,11 @@ int pick_job_hps(const HwConfig *cfg, TfheJob *jobs, int n_jobs, double now_us) 
         }
     }
 
-    return best_idx;  // may be -1 if no job is ready
+    return best_idx; 
 }
+
+
+
 
 // Compute per-bootstrap time
 double bootstrap_time_us(const HwConfig *cfg, const TfheJob *job) {
