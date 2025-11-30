@@ -139,8 +139,21 @@ def plot_job_gantt(ax, events, title):
             linewidth=0.3
         )
 
-    ax.set_yticks(list(y_positions.values()))
-    ax.set_yticklabels([f"Job {jid}" for jid in job_ids])
+    # ax.set_yticks(list(y_positions.values()))
+    # ax.set_yticklabels([f"{jid}" for jid in job_ids]) # Job
+    # ax.invert_yaxis()
+    # ax.set_xlabel("Time (us)")
+    # ax.set_title(title)
+
+    n_jobs = len(job_ids)
+    step = 5  # Show every 10 jobs;
+    yticks = list(range(0, n_jobs, step))
+    yticklabels = [str(job_ids[i]) for i in yticks]
+
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels)
+    ax.set_ylabel("Process ID")
+
     ax.invert_yaxis()
     ax.set_xlabel("Time (us)")
     ax.set_title(title)
@@ -215,7 +228,7 @@ def main():
     #  FIGURE: parallel Gantt + CDF
     # =====================================================
 
-    fig = plt.figure(figsize=(14, 10))
+    fig = plt.figure(figsize=(14, 12))
     gs = fig.add_gridspec(3, 2, height_ratios=[2, 2, 1])
 
     ax_f_gantt = fig.add_subplot(gs[0, :])
@@ -233,78 +246,92 @@ def main():
     fig.savefig(out_file, dpi=250)
     print("Wrote", out_file)
 
-    if _HAS_TIKZ:
-        try:
-            tikzplotlib.save(f"{out_prefix}_gantt_engines_cdf.tex")
-            print("Wrote", f"{out_prefix}_gantt_engines_cdf.tex")
-        except Exception as e:
-            print("tikzplotlib failed:", e)
+    # if _HAS_TIKZ:
+    #     try:
+    #         tikzplotlib.save(f"{out_prefix}_gantt_engines_cdf.tex")
+    #         print("Wrote", f"{out_prefix}_gantt_engines_cdf.tex")
+    #     except Exception as e:
+    #         print("tikzplotlib failed:", e)
 
     # =====================================================
-    #  Summary bar chart
+    #  Summary
     # =====================================================
 
-    mean_fifo, med_fifo = summary_stats(fifo_jobs)
-    mean_hps, med_hps = summary_stats(hps_jobs)
+    # mean_fifo, med_fifo = summary_stats(fifo_jobs)
+    # mean_hps, med_hps = summary_stats(hps_jobs)
 
-    fig2, ax2 = plt.subplots(figsize=(6, 4))
-    labels = ["FIFO", "HPS"]
-    means = [mean_fifo, mean_hps]
-    meds  = [med_fifo, med_hps]
+    # fig2, ax2 = plt.subplots(figsize=(6, 4))
+    # labels = ["FIFO", "HPS"]
+    # means = [mean_fifo, mean_hps]
+    # meds  = [med_fifo, med_hps]
 
-    x = np.arange(len(labels))
-    width = 0.35
-    ax2.bar(x - width/2, means, width, label="Mean turnaround")
-    ax2.bar(x + width/2, meds,  width, label="Median turnaround")
+    # x = np.arange(len(labels))
+    # width = 0.35
+    # ax2.bar(x - width/2, means, width, label="Mean turnaround")
+    # ax2.bar(x + width/2, meds,  width, label="Median turnaround")
 
-    ax2.set_xticks(x)
-    ax2.set_xticklabels(labels)
-    ax2.set_ylabel("Time (us)")
-    ax2.set_title("Turnaround Summary")
-    ax2.legend()
+    # ax2.set_xticks(x)
+    # ax2.set_xticklabels(labels)
+    # ax2.set_ylabel("Time (us)")
+    # ax2.set_title("Turnaround Summary")
+    # ax2.legend()
 
-    fig2.tight_layout()
-    out_file2 = f"{out_prefix}_turnaround_summary.png"
-    fig2.savefig(out_file2, dpi=250)
-    print("Wrote", out_file2)
+    # fig2.tight_layout()
+    # out_file2 = f"{out_prefix}_turnaround_summary.png"
+    # fig2.savefig(out_file2, dpi=250)
+    # print("Wrote", out_file2)
+
+    # if _HAS_TIKZ:
+    #     try:
+    #         tikzplotlib.save(f"{out_prefix}_turnaround_summary.tex")
+    #         print("Wrote", f"{out_prefix}_turnaround_summary.tex")
+    #     except Exception as e:
+    #         print("tikzplotlib failed:", e)
 
     # ================================================
     # JOB-LEVEL GANTT (both FIFO and HPS)
     # ================================================
-    fig3 = plt.figure(figsize=(14, 12))
+    fig3 = plt.figure(figsize=(14, 6))
     gs3 = fig3.add_gridspec(2, 1)
 
     ax_job_fifo = fig3.add_subplot(gs3[0, 0])
     ax_job_hps  = fig3.add_subplot(gs3[1, 0])
 
-    plot_job_gantt(ax_job_fifo, fifo_engs, "FIFO: Job-Level Execution (Engine Slices)")
-    plot_job_gantt(ax_job_hps,  hps_engs,  "HPS: Job-Level Execution (Engine Slices)")
+    plot_job_gantt(ax_job_fifo, fifo_engs, "FIFO: Process-Level Execution (Engine Slices)")
+    plot_job_gantt(ax_job_hps,  hps_engs,  "HPS: Process-Level Execution (Engine Slices)")
 
     plt.tight_layout()
     out_file3 = f"{out_prefix}_job_gantt_slices.png"
     fig3.savefig(out_file3, dpi=250)
     print("Wrote", out_file3)
 
-    fig4 = plt.figure(figsize=(14, 12))
-    gs4 = fig4.add_gridspec(2, 1)
+    # if _HAS_TIKZ:
+    #     try:
+    #         tikzplotlib.save(f"{out_prefix}_job_gantt_slices.tex")
+    #         print("Wrote", f"{out_prefix}_job_gantt_slices.tex")
+    #     except Exception as e:
+    #         print("tikzplotlib failed:", e)
 
-    ax_span_fifo = fig4.add_subplot(gs4[0, 0])
-    ax_span_hps  = fig4.add_subplot(gs4[1, 0])
+    # fig4 = plt.figure(figsize=(14, 12))
+    # gs4 = fig4.add_gridspec(2, 1)
 
-    plot_job_span(ax_span_fifo, fifo_jobs, "FIFO: Job-Level Span (Start → Completion)")
-    plot_job_span(ax_span_hps,  hps_jobs,  "HPS: Job-Level Span (Start → Completion)")
+    # ax_span_fifo = fig4.add_subplot(gs4[0, 0])
+    # ax_span_hps  = fig4.add_subplot(gs4[1, 0])
 
-    plt.tight_layout()
-    out_file4 = f"{out_prefix}_job_gantt_spans.png"
-    fig4.savefig(out_file4, dpi=250)
-    print("Wrote", out_file4)
+    # plot_job_span(ax_span_fifo, fifo_jobs, "FIFO: Job-Level Span (Start → Completion)")
+    # plot_job_span(ax_span_hps,  hps_jobs,  "HPS: Job-Level Span (Start → Completion)")
 
-    if _HAS_TIKZ:
-        try:
-            tikzplotlib.save(f"{out_prefix}_turnaround_summary.tex")
-            print("Wrote", f"{out_prefix}_turnaround_summary.tex")
-        except Exception as e:
-            print("tikzplotlib failed:", e)
+    # plt.tight_layout()
+    # out_file4 = f"{out_prefix}_job_gantt_spans.png"
+    # fig4.savefig(out_file4, dpi=250)
+    # print("Wrote", out_file4)
+
+    # if _HAS_TIKZ:
+    #     try:
+    #         tikzplotlib.save(f"{out_prefix}_job_gantt_spans.tex")
+    #         print("Wrote", f"{out_prefix}_job_gantt_spans.tex")
+    #     except Exception as e:
+    #         print("tikzplotlib failed:", e)
 
 
 if __name__ == "__main__":
