@@ -1,0 +1,162 @@
+% This file was created with tikzplotlib v0.10.1.
+\begin{tikzpicture}
+
+\definecolor{crimson2143940}{RGB}{214,39,40}
+\definecolor{darkgray176}{RGB}{176,176,176}
+\definecolor{darkorange25512714}{RGB}{255,127,14}
+\definecolor{darkturquoise23190207}{RGB}{23,190,207}
+\definecolor{forestgreen4416044}{RGB}{44,160,44}
+\definecolor{goldenrod18818934}{RGB}{188,189,34}
+\definecolor{gray127}{RGB}{127,127,127}
+\definecolor{khaki219219141}{RGB}{219,219,141}
+\definecolor{lightblue158218229}{RGB}{158,218,229}
+\definecolor{lightgreen152223138}{RGB}{152,223,138}
+\definecolor{lightsalmon255152150}{RGB}{255,152,150}
+\definecolor{lightsalmon255187120}{RGB}{255,187,120}
+\definecolor{lightsteelblue174199232}{RGB}{174,199,232}
+\definecolor{mediumpurple148103189}{RGB}{148,103,189}
+\definecolor{orchid227119194}{RGB}{227,119,194}
+\definecolor{pink247182210}{RGB}{247,182,210}
+\definecolor{rosybrown196156148}{RGB}{196,156,148}
+\definecolor{sienna1408675}{RGB}{140,86,75}
+\definecolor{silver199}{RGB}{199,199,199}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+\definecolor{thistle197176213}{RGB}{197,176,213}
+
+\begin{groupplot}[group style={group size=1 by 2}]
+\nextgroupplot[
+tick align=outside,
+tick pos=left,
+title={FIFO: Job-Level Span (Start → Completion)},
+x grid style={darkgray176},
+xlabel={Time (us)},
+xmin=12, xmax=5096424.3,
+xtick style={color=black},
+xtick={0,1000000,2000000,3000000,4000000,5000000,6000000},
+xticklabels={0,1,2,3,4,5,6},
+y dir=reverse,
+y grid style={darkgray176},
+ylabel={Job ID},
+ymin=-2.89, ymax=51.89,
+ytick style={color=black}
+]
+\draw[draw=black,fill=steelblue31119180,line width=0.12pt] (axis cs:12,-0.4) rectangle (axis cs:168888,0.4);
+\draw[draw=black,fill=lightsteelblue174199232,line width=0.12pt] (axis cs:168888,0.6) rectangle (axis cs:398722,1.4);
+\draw[draw=black,fill=darkorange25512714,line width=0.12pt] (axis cs:398722,1.6) rectangle (axis cs:711390,2.4);
+\draw[draw=black,fill=lightsalmon255187120,line width=0.12pt] (axis cs:711390,2.6) rectangle (axis cs:927111,3.4);
+\draw[draw=black,fill=forestgreen4416044,line width=0.12pt] (axis cs:927111,3.6) rectangle (axis cs:1036570,4.4);
+\draw[draw=black,fill=lightgreen152223138,line width=0.12pt] (axis cs:1036570,4.6) rectangle (axis cs:1047845,5.4);
+\draw[draw=black,fill=crimson2143940,line width=0.12pt] (axis cs:1047845,5.6) rectangle (axis cs:1059129,6.4);
+\draw[draw=black,fill=lightsalmon255152150,line width=0.12pt] (axis cs:1059129,6.6) rectangle (axis cs:1067743,7.4);
+\draw[draw=black,fill=mediumpurple148103189,line width=0.12pt] (axis cs:1067743,7.6) rectangle (axis cs:1079956,8.4);
+\draw[draw=black,fill=thistle197176213,line width=0.12pt] (axis cs:1079956,8.6) rectangle (axis cs:1081473,9.4);
+\draw[draw=black,fill=sienna1408675,line width=0.12pt] (axis cs:1081473,9.6) rectangle (axis cs:1083760,10.4);
+\draw[draw=black,fill=rosybrown196156148,line width=0.12pt] (axis cs:1083760,10.6) rectangle (axis cs:1087244,11.4);
+\draw[draw=black,fill=orchid227119194,line width=0.12pt] (axis cs:1087244,11.6) rectangle (axis cs:1087819,12.4);
+\draw[draw=black,fill=pink247182210,line width=0.12pt] (axis cs:1087819,12.6) rectangle (axis cs:1089707,13.4);
+\draw[draw=black,fill=gray127,line width=0.12pt] (axis cs:1089707,13.6) rectangle (axis cs:1091313,14.4);
+\draw[draw=black,fill=silver199,line width=0.12pt] (axis cs:1091313,14.6) rectangle (axis cs:1107749,15.4);
+\draw[draw=black,fill=goldenrod18818934,line width=0.12pt] (axis cs:1107749,15.6) rectangle (axis cs:1119782,16.4);
+\draw[draw=black,fill=khaki219219141,line width=0.12pt] (axis cs:1119782,16.6) rectangle (axis cs:1137012,17.4);
+\draw[draw=black,fill=darkturquoise23190207,line width=0.12pt] (axis cs:1137012,17.6) rectangle (axis cs:1146447,18.4);
+\draw[draw=black,fill=lightblue158218229,line width=0.12pt] (axis cs:1146447,18.6) rectangle (axis cs:1161981,19.4);
+\draw[draw=black,fill=steelblue31119180,line width=0.12pt] (axis cs:1161981,19.6) rectangle (axis cs:1505961,20.4);
+\draw[draw=black,fill=lightsteelblue174199232,line width=0.12pt] (axis cs:1505961,20.6) rectangle (axis cs:1871775,21.4);
+\draw[draw=black,fill=darkorange25512714,line width=0.12pt] (axis cs:1871775,21.6) rectangle (axis cs:2112153,22.4);
+\draw[draw=black,fill=lightsalmon255187120,line width=0.12pt] (axis cs:2112153,22.6) rectangle (axis cs:2471737,23.4);
+\draw[draw=black,fill=forestgreen4416044,line width=0.12pt] (axis cs:2471737,23.6) rectangle (axis cs:3003564,24.4);
+\draw[draw=black,fill=lightgreen152223138,line width=0.12pt] (axis cs:3003564,24.6) rectangle (axis cs:3296265,25.4);
+\draw[draw=black,fill=crimson2143940,line width=0.12pt] (axis cs:3296265,25.6) rectangle (axis cs:3299115,26.4);
+\draw[draw=black,fill=lightsalmon255152150,line width=0.12pt] (axis cs:3299115,26.6) rectangle (axis cs:3302809,27.4);
+\draw[draw=black,fill=mediumpurple148103189,line width=0.12pt] (axis cs:3302809,27.6) rectangle (axis cs:3308476,28.4);
+\draw[draw=black,fill=thistle197176213,line width=0.12pt] (axis cs:3308476,28.6) rectangle (axis cs:3316776,29.4);
+\draw[draw=black,fill=sienna1408675,line width=0.12pt] (axis cs:3316776,29.6) rectangle (axis cs:3317445,30.4);
+\draw[draw=black,fill=rosybrown196156148,line width=0.12pt] (axis cs:3317445,30.6) rectangle (axis cs:3318587,31.4);
+\draw[draw=black,fill=orchid227119194,line width=0.12pt] (axis cs:3318587,31.6) rectangle (axis cs:3318908,32.4);
+\draw[draw=black,fill=pink247182210,line width=0.12pt] (axis cs:3318908,32.6) rectangle (axis cs:3320327,33.4);
+\draw[draw=black,fill=gray127,line width=0.12pt] (axis cs:3320327,33.6) rectangle (axis cs:3324860,34.4);
+\draw[draw=black,fill=silver199,line width=0.12pt] (axis cs:3324860,34.6) rectangle (axis cs:3348361,35.4);
+\draw[draw=black,fill=goldenrod18818934,line width=0.12pt] (axis cs:3348361,35.6) rectangle (axis cs:3370750,36.4);
+\draw[draw=black,fill=khaki219219141,line width=0.12pt] (axis cs:3370750,36.6) rectangle (axis cs:3386122,37.4);
+\draw[draw=black,fill=darkturquoise23190207,line width=0.12pt] (axis cs:3386122,37.6) rectangle (axis cs:3423684,38.4);
+\draw[draw=black,fill=lightblue158218229,line width=0.12pt] (axis cs:3423684,38.6) rectangle (axis cs:3452176,39.4);
+\draw[draw=black,fill=steelblue31119180,line width=0.12pt] (axis cs:3452176,39.6) rectangle (axis cs:3842044,40.4);
+\draw[draw=black,fill=lightsteelblue174199232,line width=0.12pt] (axis cs:3842044,40.6) rectangle (axis cs:4098145,41.4);
+\draw[draw=black,fill=darkorange25512714,line width=0.12pt] (axis cs:4098145,41.6) rectangle (axis cs:4426446,42.4);
+\draw[draw=black,fill=lightsalmon255187120,line width=0.12pt] (axis cs:4426446,42.6) rectangle (axis cs:4623468,43.4);
+\draw[draw=black,fill=forestgreen4416044,line width=0.12pt] (axis cs:4623468,43.6) rectangle (axis cs:4843652,44.4);
+\draw[draw=black,fill=lightgreen152223138,line width=0.12pt] (axis cs:4843652,44.6) rectangle (axis cs:4845446,45.4);
+\draw[draw=black,fill=crimson2143940,line width=0.12pt] (axis cs:4845446,45.6) rectangle (axis cs:4847654,46.4);
+\draw[draw=black,fill=lightsalmon255152150,line width=0.12pt] (axis cs:4847654,46.6) rectangle (axis cs:4851482,47.4);
+\draw[draw=black,fill=mediumpurple148103189,line width=0.12pt] (axis cs:4851482,47.6) rectangle (axis cs:4852623,48.4);
+\draw[draw=black,fill=thistle197176213,line width=0.12pt] (axis cs:4852623,48.6) rectangle (axis cs:4853738,49.4);
+
+\nextgroupplot[
+tick align=outside,
+tick pos=left,
+title={HPS: Job-Level Span (Start → Completion)},
+x grid style={darkgray176},
+xlabel={Time (us)},
+xmin=12, xmax=5096424.3,
+xtick style={color=black},
+xtick={0,1000000,2000000,3000000,4000000,5000000,6000000},
+xticklabels={0,1,2,3,4,5,6},
+y dir=reverse,
+y grid style={darkgray176},
+ylabel={Job ID},
+ymin=-2.89, ymax=51.89,
+ytick style={color=black}
+]
+\draw[draw=black,fill=steelblue31119180,line width=0.12pt] (axis cs:12,-0.4) rectangle (axis cs:4269236,0.4);
+\draw[draw=black,fill=lightsteelblue174199232,line width=0.12pt] (axis cs:983046,0.6) rectangle (axis cs:1578694,1.4);
+\draw[draw=black,fill=darkorange25512714,line width=0.12pt] (axis cs:2018603,1.6) rectangle (axis cs:2331270,2.4);
+\draw[draw=black,fill=lightsalmon255187120,line width=0.12pt] (axis cs:3574358,2.6) rectangle (axis cs:3790079,3.4);
+\draw[draw=black,fill=forestgreen4416044,line width=0.12pt] (axis cs:1909144,3.6) rectangle (axis cs:2018603,4.4);
+\draw[draw=black,fill=lightgreen152223138,line width=0.12pt] (axis cs:3076029,4.6) rectangle (axis cs:3087304,5.4);
+\draw[draw=black,fill=crimson2143940,line width=0.12pt] (axis cs:798047,5.6) rectangle (axis cs:809331,6.4);
+\draw[draw=black,fill=lightsalmon255152150,line width=0.12pt] (axis cs:4097375,6.6) rectangle (axis cs:4105989,7.4);
+\draw[draw=black,fill=mediumpurple148103189,line width=0.12pt] (axis cs:3088911,7.6) rectangle (axis cs:3101123,8.4);
+\draw[draw=black,fill=thistle197176213,line width=0.12pt] (axis cs:3115818,8.6) rectangle (axis cs:3117335,9.4);
+\draw[draw=black,fill=sienna1408675,line width=0.12pt] (axis cs:1872679,9.6) rectangle (axis cs:1874966,10.4);
+\draw[draw=black,fill=rosybrown196156148,line width=0.12pt] (axis cs:3107801,10.6) rectangle (axis cs:3111284,11.4);
+\draw[draw=black,fill=orchid227119194,line width=0.12pt] (axis cs:593976,11.6) rectangle (axis cs:594551,12.4);
+\draw[draw=black,fill=pink247182210,line width=0.12pt] (axis cs:3572471,12.6) rectangle (axis cs:3574358,13.4);
+\draw[draw=black,fill=gray127,line width=0.12pt] (axis cs:3087304,13.6) rectangle (axis cs:3088911,14.4);
+\draw[draw=black,fill=silver199,line width=0.12pt] (axis cs:1874966,14.6) rectangle (axis cs:1891402,15.4);
+\draw[draw=black,fill=goldenrod18818934,line width=0.12pt] (axis cs:3790079,15.6) rectangle (axis cs:3802113,16.4);
+\draw[draw=black,fill=khaki219219141,line width=0.12pt] (axis cs:3049439,16.6) rectangle (axis cs:3066668,17.4);
+\draw[draw=black,fill=darkturquoise23190207,line width=0.12pt] (axis cs:3117335,17.6) rectangle (axis cs:3126770,18.4);
+\draw[draw=black,fill=lightblue158218229,line width=0.12pt] (axis cs:1891402,18.6) rectangle (axis cs:1906935,19.4);
+\draw[draw=black,fill=steelblue31119180,line width=0.12pt] (axis cs:225826,19.6) rectangle (axis cs:569806,20.4);
+\draw[draw=black,fill=lightsteelblue174199232,line width=0.12pt] (axis cs:1002746,20.6) rectangle (axis cs:1368560,21.4);
+\draw[draw=black,fill=darkorange25512714,line width=0.12pt] (axis cs:3323792,21.6) rectangle (axis cs:3564170,22.4);
+\draw[draw=black,fill=lightsalmon255187120,line width=0.12pt] (axis cs:594551,22.6) rectangle (axis cs:981932,23.4);
+\draw[draw=black,fill=forestgreen4416044,line width=0.12pt] (axis cs:4271030,23.6) rectangle (axis cs:4802856,24.4);
+\draw[draw=black,fill=lightgreen152223138,line width=0.12pt] (axis cs:3802113,24.6) rectangle (axis cs:4094814,25.4);
+\draw[draw=black,fill=crimson2143940,line width=0.12pt] (axis cs:3101123,25.6) rectangle (axis cs:3103973,26.4);
+\draw[draw=black,fill=lightsalmon255152150,line width=0.12pt] (axis cs:3066668,26.6) rectangle (axis cs:3070362,27.4);
+\draw[draw=black,fill=mediumpurple148103189,line width=0.12pt] (axis cs:3070362,27.6) rectangle (axis cs:3076029,28.4);
+\draw[draw=black,fill=thistle197176213,line width=0.12pt] (axis cs:3564170,28.6) rectangle (axis cs:3572471,29.4);
+\draw[draw=black,fill=sienna1408675,line width=0.12pt] (axis cs:569806,29.6) rectangle (axis cs:570475,30.4);
+\draw[draw=black,fill=rosybrown196156148,line width=0.12pt] (axis cs:652084,30.6) rectangle (axis cs:653226,31.4);
+\draw[draw=black,fill=orchid227119194,line width=0.12pt] (axis cs:1872358,31.6) rectangle (axis cs:1872679,32.4);
+\draw[draw=black,fill=pink247182210,line width=0.12pt] (axis cs:4095956,32.6) rectangle (axis cs:4097375,33.4);
+\draw[draw=black,fill=gray127,line width=0.12pt] (axis cs:3111284,33.6) rectangle (axis cs:3115818,34.4);
+\draw[draw=black,fill=silver199,line width=0.12pt] (axis cs:570475,34.6) rectangle (axis cs:593976,35.4);
+\draw[draw=black,fill=goldenrod18818934,line width=0.12pt] (axis cs:4831348,35.6) rectangle (axis cs:4853738,36.4);
+\draw[draw=black,fill=khaki219219141,line width=0.12pt] (axis cs:761101,36.6) rectangle (axis cs:776472,37.4);
+\draw[draw=black,fill=darkturquoise23190207,line width=0.12pt] (axis cs:1834795,37.6) rectangle (axis cs:1872358,38.4);
+\draw[draw=black,fill=lightblue158218229,line width=0.12pt] (axis cs:4802856,38.6) rectangle (axis cs:4831348,39.4);
+\draw[draw=black,fill=steelblue31119180,line width=0.12pt] (axis cs:2331270,39.6) rectangle (axis cs:2721138,40.4);
+\draw[draw=black,fill=lightsteelblue174199232,line width=0.12pt] (axis cs:1578694,40.6) rectangle (axis cs:1834795,41.4);
+\draw[draw=black,fill=darkorange25512714,line width=0.12pt] (axis cs:2721138,41.6) rectangle (axis cs:3049439,42.4);
+\draw[draw=black,fill=lightsalmon255187120,line width=0.12pt] (axis cs:3126770,42.6) rectangle (axis cs:3323792,43.4);
+\draw[draw=black,fill=forestgreen4416044,line width=0.12pt] (axis cs:5642,43.6) rectangle (axis cs:225826,44.4);
+\draw[draw=black,fill=lightgreen152223138,line width=0.12pt] (axis cs:4269236,44.6) rectangle (axis cs:4271030,45.4);
+\draw[draw=black,fill=crimson2143940,line width=0.12pt] (axis cs:1906935,45.6) rectangle (axis cs:1909144,46.4);
+\draw[draw=black,fill=lightsalmon255152150,line width=0.12pt] (axis cs:3103973,46.6) rectangle (axis cs:3107801,47.4);
+\draw[draw=black,fill=mediumpurple148103189,line width=0.12pt] (axis cs:4094814,47.6) rectangle (axis cs:4095956,48.4);
+\draw[draw=black,fill=thistle197176213,line width=0.12pt] (axis cs:981932,48.6) rectangle (axis cs:983046,49.4);
+\end{groupplot}
+
+\end{tikzpicture}

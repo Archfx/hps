@@ -31,7 +31,18 @@ typedef struct {
 
 typedef struct {
     int job_id;
+    double start_us;
+    double end_us;
+} EngineLogEntry;
+
+typedef struct {
+    int job_id;
     double busy_until_us;
+
+    // NEW: timeline log
+    EngineLogEntry *log;
+    int log_len;
+    int log_cap;
 } Engine;
 
 typedef struct {

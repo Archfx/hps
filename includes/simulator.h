@@ -3,6 +3,7 @@
 
 #include "types.h"
 
+
 typedef int (*SchedulerFn)(const HwConfig *, TfheJob *, int, double);
 
 SimStats run_simulation(const HwConfig *cfg,
@@ -16,5 +17,7 @@ void simulator_set_pcie_scale(double scale);
 void simulator_set_pcie_cap_mb(double cap_mb);
 void simulator_set_show_progress(int show);
 void simulator_set_csv_prefix(const char *prefix);
+
+
 
 #endif

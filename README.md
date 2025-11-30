@@ -64,3 +64,19 @@ Notes
 
 - When the system is saturated (engines fully utilized and long jobs), ordering differences between FIFO and HPS may have limited effect on makespan; use workloads with many small jobs or tighter deadlines to better exercise scheduling heuristics.
 
+
+
+run.sh
+----
+
+```sh
+
+HPS_LOG_PICKS=1 ./tfhe_sim --pcie-scale 10 --progress --dump-csv test_small examples/hw/hw3.cfg examples/workloads/w3.txt
+
+python3 plotter/plotter.py examples/results/test2-fifo.csv examples/results/test2-hps.csv --out-prefix examples/results/test_small
+
+# modified
+
+python3 plotter/plotter.py examples/results/test2 --out-prefix examples/resul
+ts/test_small
+```
